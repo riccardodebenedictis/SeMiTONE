@@ -151,7 +151,7 @@ public class PBTheory implements Theory {
                 switch (sat.value(term.getIntKey())) {
                 case True:
                 case Undefined:
-                    v.sub(term.getValue());
+                    v.add(term.getValue());
                 }
             }
         }
@@ -176,7 +176,7 @@ public class PBTheory implements Theory {
             } else {
                 switch (sat.value(term.getIntKey())) {
                 case True:
-                    v.sub(term.getValue());
+                    v.add(term.getValue());
                 }
             }
         }
@@ -184,22 +184,22 @@ public class PBTheory implements Theory {
     }
 
     @Override
-    public boolean propagate(Lit p, List<Lit> cnfl) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean propagate(final Lit p, final List<Lit> cnfl) {
+        assert cnfl.isEmpty();
+        return true;
     }
 
     @Override
-    public boolean check(List<Lit> cnfl) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean check(final List<Lit> cnfl) {
+        assert cnfl.isEmpty();
+        return true;
     }
 
     @Override
     public void push() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void pop() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
