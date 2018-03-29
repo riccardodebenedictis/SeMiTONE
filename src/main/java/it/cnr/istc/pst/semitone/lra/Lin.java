@@ -263,7 +263,7 @@ public class Lin {
                 } else if (entry.getValue().isPositive()) {
                     str.append(" + ").append(entry.getValue().toString()).append("*x");
                 } else {
-                    str.append(" - ").append(entry.getValue().toString()).append("*x");
+                    str.append(" - ").append(entry.getValue().minus().toString()).append("*x");
                 }
                 str.append(entry.getIntKey());
             }
