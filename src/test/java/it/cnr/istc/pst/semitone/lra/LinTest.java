@@ -16,7 +16,7 @@
  */
 package it.cnr.istc.pst.semitone.lra;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 /**
  *

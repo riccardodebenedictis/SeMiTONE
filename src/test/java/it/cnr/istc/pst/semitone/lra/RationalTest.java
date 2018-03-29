@@ -18,10 +18,10 @@ package it.cnr.istc.pst.semitone.lra;
 
 import static it.cnr.istc.pst.semitone.lra.Rational.NEGATIVE_INFINITY;
 import static it.cnr.istc.pst.semitone.lra.Rational.POSITIVE_INFINITY;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 /**
  *
