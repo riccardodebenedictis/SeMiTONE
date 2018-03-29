@@ -21,7 +21,8 @@ import static it.cnr.istc.pst.semitone.sat.LBool.True;
 import static it.cnr.istc.pst.semitone.sat.LBool.Undefined;
 import static it.cnr.istc.pst.semitone.sat.Sat.FALSE_var;
 import static it.cnr.istc.pst.semitone.sat.Sat.TRUE_var;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 

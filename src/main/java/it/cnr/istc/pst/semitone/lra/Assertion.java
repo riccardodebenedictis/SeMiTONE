@@ -18,8 +18,10 @@ package it.cnr.istc.pst.semitone.lra;
 
 import static it.cnr.istc.pst.semitone.lra.LRATheory.lb_index;
 import static it.cnr.istc.pst.semitone.lra.LRATheory.ub_index;
-import it.cnr.istc.pst.semitone.sat.Lit;
+
 import java.util.List;
+
+import it.cnr.istc.pst.semitone.sat.Lit;
 
 /**
  * This class is used for representing assertions of the linear real arithmetic

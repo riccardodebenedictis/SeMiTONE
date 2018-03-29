@@ -17,10 +17,17 @@
 package it.cnr.istc.pst.semitone.var;
 
 import static it.cnr.istc.pst.semitone.sat.LBool.False;
-import it.cnr.istc.pst.semitone.sat.Lit;
-import it.cnr.istc.pst.semitone.sat.Sat;
 import static it.cnr.istc.pst.semitone.sat.Sat.FALSE_var;
 import static it.cnr.istc.pst.semitone.sat.Sat.TRUE_var;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import it.cnr.istc.pst.semitone.sat.Lit;
+import it.cnr.istc.pst.semitone.sat.Sat;
 import it.cnr.istc.pst.semitone.sat.Theory;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -28,11 +35,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  *

@@ -19,6 +19,7 @@ package it.cnr.istc.pst.semitone.sat;
 import static it.cnr.istc.pst.semitone.sat.LBool.False;
 import static it.cnr.istc.pst.semitone.sat.LBool.True;
 import static it.cnr.istc.pst.semitone.sat.Sat.index;
+
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

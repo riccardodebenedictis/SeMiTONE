@@ -16,20 +16,22 @@
  */
 package it.cnr.istc.pst.semitone.pb;
 
+import static it.cnr.istc.pst.semitone.sat.Sat.FALSE_var;
+import static it.cnr.istc.pst.semitone.sat.Sat.TRUE_var;
+
+import java.util.Collection;
+import java.util.List;
+
 import it.cnr.istc.pst.semitone.lra.InfRational;
 import it.cnr.istc.pst.semitone.lra.Lin;
 import it.cnr.istc.pst.semitone.lra.Rational;
 import it.cnr.istc.pst.semitone.sat.Lit;
 import it.cnr.istc.pst.semitone.sat.Sat;
-import static it.cnr.istc.pst.semitone.sat.Sat.FALSE_var;
-import static it.cnr.istc.pst.semitone.sat.Sat.TRUE_var;
 import it.cnr.istc.pst.semitone.sat.Theory;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import java.util.Collection;
-import java.util.List;
 
 /**
  *

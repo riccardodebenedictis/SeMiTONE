@@ -18,10 +18,16 @@ package it.cnr.istc.pst.semitone.lra;
 
 import static it.cnr.istc.pst.semitone.lra.Rational.NEGATIVE_INFINITY;
 import static it.cnr.istc.pst.semitone.lra.Rational.POSITIVE_INFINITY;
-import it.cnr.istc.pst.semitone.sat.Lit;
-import it.cnr.istc.pst.semitone.sat.Sat;
 import static it.cnr.istc.pst.semitone.sat.Sat.FALSE_var;
 import static it.cnr.istc.pst.semitone.sat.Sat.TRUE_var;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.List;
+import java.util.Optional;
+
+import it.cnr.istc.pst.semitone.sat.Lit;
+import it.cnr.istc.pst.semitone.sat.Sat;
 import it.cnr.istc.pst.semitone.sat.Theory;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -29,10 +35,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.List;
-import java.util.Optional;
 
 /**
  *
