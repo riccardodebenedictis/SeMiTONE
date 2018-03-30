@@ -19,7 +19,9 @@ package it.cnr.istc.pst.semitone.pb;
 import static it.cnr.istc.pst.semitone.sat.Sat.FALSE_var;
 import static it.cnr.istc.pst.semitone.sat.Sat.TRUE_var;
 
+import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.List;
 
 import it.cnr.istc.pst.semitone.lra.InfRational;
@@ -29,9 +31,14 @@ import it.cnr.istc.pst.semitone.sat.Lit;
 import it.cnr.istc.pst.semitone.sat.Sat;
 import it.cnr.istc.pst.semitone.sat.Theory;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 
 /**
  *
@@ -40,9 +47,10 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 public class PBTheory implements Theory {
 
     private final Sat sat;
-    final Int2ObjectMap<Collection<PBConstraint>> c_watches = new Int2ObjectOpenHashMap<>(); // for each variable 'v', a list of pseudo-boolean constraints watching 'v'..
+    private final Int2ObjectMap<Collection<PBConstraint>> c_watches = new Int2ObjectOpenHashMap<>(); // for each variable 'v', a list of pseudo-boolean constraints watching 'v'..
     private final Int2ObjectMap<PBConstraint> v_cnstrs = new Int2ObjectOpenHashMap<>(); // the pseudo-boolean constraints (propositional variable to constraint) used for enforcing (negating) constraints..
     private final Object2IntMap<String> exprs = new Object2IntOpenHashMap<>(); // the already existing expressions (string to variable)..
+    private final Deque<Layer> layers = new ArrayDeque<>(); // we store the updated bounds..
 
     public PBTheory(Sat sat) {
         this.sat = sat;
@@ -55,16 +63,18 @@ public class PBTheory implements Theory {
         final InfRational c_right = new InfRational(l_xpr.known_term.minus(), -1);
         l_xpr.known_term = new Rational();
 
-        if (ub(l_xpr).leq(c_right)) {
+        Rational lb = lb(l_xpr);
+        Rational ub = ub(l_xpr);
+        if (c_right.geq(ub)) {
             return TRUE_var; // the constraint is already satisfied..
-        } else if (lb(l_xpr).gt(c_right)) {
+        } else if (c_right.lt(lb)) {
             return FALSE_var; // the constraint is unsatisfable..
         }
 
         return exprs.computeIntIfAbsent(l_xpr.toString() + " <= " + c_right.toString(), s_xpr -> {
             final int ctr = sat.newVar();
             sat.bind(ctr, this);
-            v_cnstrs.put(ctr, new PBConstraint(this, ctr, l_xpr, PBConstraint.Op.LEq, c_right));
+            v_cnstrs.put(ctr, new PBConstraint(ctr, l_xpr, lb, ub, Op.LEq, c_right));
             return ctr;
         });
     }
@@ -75,16 +85,18 @@ public class PBTheory implements Theory {
         final InfRational c_right = new InfRational(l_xpr.known_term.minus());
         l_xpr.known_term = new Rational();
 
-        if (ub(l_xpr).leq(c_right)) {
+        Rational lb = lb(l_xpr);
+        Rational ub = ub(l_xpr);
+        if (c_right.gt(ub)) {
             return TRUE_var; // the constraint is already satisfied..
-        } else if (lb(l_xpr).gt(c_right)) {
+        } else if (c_right.leq(lb)) {
             return FALSE_var; // the constraint is unsatisfable..
         }
 
         return exprs.computeIntIfAbsent(l_xpr.toString() + " <= " + c_right.toString(), s_xpr -> {
             final int ctr = sat.newVar();
             sat.bind(ctr, this);
-            v_cnstrs.put(ctr, new PBConstraint(this, ctr, l_xpr, PBConstraint.Op.LEq, c_right));
+            v_cnstrs.put(ctr, new PBConstraint(ctr, l_xpr, lb, ub, Op.LEq, c_right));
             return ctr;
         });
     }
@@ -99,16 +111,18 @@ public class PBTheory implements Theory {
         final InfRational c_right = new InfRational(l_xpr.known_term.minus());
         l_xpr.known_term = new Rational();
 
-        if (lb(l_xpr).geq(c_right)) {
+        Rational lb = lb(l_xpr);
+        Rational ub = ub(l_xpr);
+        if (c_right.lt(ub)) {
             return TRUE_var; // the constraint is already satisfied..
-        } else if (ub(l_xpr).lt(c_right)) {
+        } else if (c_right.geq(lb)) {
             return FALSE_var; // the constraint is unsatisfable..
         }
 
         return exprs.computeIntIfAbsent(l_xpr.toString() + " >= " + c_right.toString(), s_xpr -> {
             final int ctr = sat.newVar();
             sat.bind(ctr, this);
-            v_cnstrs.put(ctr, new PBConstraint(this, ctr, l_xpr, PBConstraint.Op.GEq, c_right));
+            v_cnstrs.put(ctr, new PBConstraint(ctr, l_xpr, lb, ub, Op.GEq, c_right));
             return ctr;
         });
     }
@@ -119,16 +133,18 @@ public class PBTheory implements Theory {
         final InfRational c_right = new InfRational(l_xpr.known_term.minus(), 1);
         l_xpr.known_term = new Rational();
 
-        if (lb(l_xpr).geq(c_right)) {
+        Rational lb = lb(l_xpr);
+        Rational ub = ub(l_xpr);
+        if (c_right.leq(ub)) {
             return TRUE_var; // the constraint is already satisfied..
-        } else if (ub(l_xpr).lt(c_right)) {
+        } else if (c_right.gt(lb)) {
             return FALSE_var; // the constraint is unsatisfable..
         }
 
         return exprs.computeIntIfAbsent(l_xpr.toString() + " >= " + c_right.toString(), s_xpr -> {
             final int ctr = sat.newVar();
             sat.bind(ctr, this);
-            v_cnstrs.put(ctr, new PBConstraint(this, ctr, l_xpr, PBConstraint.Op.GEq, c_right));
+            v_cnstrs.put(ctr, new PBConstraint(ctr, l_xpr, lb, ub, Op.GEq, c_right));
             return ctr;
         });
     }
@@ -139,8 +155,8 @@ public class PBTheory implements Theory {
      * @param l the linear expression whose lower bound we are interested in.
      * @return the lower bound of linear expression 'l'.
      */
-    public InfRational lb(final Lin l) {
-        InfRational v = new InfRational(l.known_term);
+    public Rational lb(final Lin l) {
+        Rational v = new Rational(l.known_term);
         for (Int2ObjectMap.Entry<Rational> term : l.vars.int2ObjectEntrySet()) {
             if (term.getValue().isPositive()) {
                 switch (sat.value(term.getIntKey())) {
@@ -164,8 +180,8 @@ public class PBTheory implements Theory {
      * @param l the linear expression whose upper bound we are interested in.
      * @return the upper bound of linear expression 'l'.
      */
-    public InfRational ub(final Lin l) {
-        InfRational v = new InfRational(l.known_term);
+    public Rational ub(final Lin l) {
+        Rational v = new Rational(l.known_term);
         for (Int2ObjectMap.Entry<Rational> term : l.vars.int2ObjectEntrySet()) {
             if (term.getValue().isPositive()) {
                 switch (sat.value(term.getIntKey())) {
@@ -186,6 +202,120 @@ public class PBTheory implements Theory {
     @Override
     public boolean propagate(final Lit p, final List<Lit> cnfl) {
         assert cnfl.isEmpty();
+        for (PBConstraint c : c_watches.get(p.v)) {
+            // we update the bounds..
+            Rational cnst = c.expr.vars.get(p.v);
+            if (cnst.isPositive()) {
+                if (p.sign) {
+                    if (!layers.isEmpty()) {
+                        layers.peekFirst().lbs.computeIfAbsent(c, k -> new Rational(c.lb));
+                    }
+                    c.lb.add(cnst);
+                } else {
+                    if (!layers.isEmpty()) {
+                        layers.peekFirst().ubs.computeIfAbsent(c, k -> new Rational(c.ub));
+                    }
+                    c.ub.sub(cnst);
+                }
+            } else {
+                if (p.sign) {
+                    if (!layers.isEmpty()) {
+                        layers.peekFirst().ubs.computeIfAbsent(c, k -> new Rational(c.ub));
+                    }
+                    c.ub.add(cnst);
+                } else {
+                    if (!layers.isEmpty()) {
+                        layers.peekFirst().lbs.computeIfAbsent(c, k -> new Rational(c.lb));
+                    }
+                    c.lb.sub(cnst);
+                }
+            }
+
+            switch (c.op) {
+            case LEq:
+                switch (sat.value(c.b)) {
+                case False:
+                    break;
+                case True:
+                    break;
+                case Undefined:
+                    if (c.known_term.gt(c.ub)) {
+                        // the constraint is already satisfied..
+                        final List<Lit> learnt_clause = new ObjectArrayList<>();
+                        learnt_clause.add(new Lit(c.b));
+                        for (Int2ObjectMap.Entry<Rational> term : c.expr.vars.int2ObjectEntrySet()) {
+                            switch (sat.value(term.getIntKey())) {
+                            case False:
+                                learnt_clause.add(new Lit(term.getIntKey()));
+                                break;
+                            case True:
+                                learnt_clause.add(new Lit(term.getIntKey(), false));
+                                break;
+                            }
+                        }
+                        sat.record(learnt_clause.toArray(new Lit[learnt_clause.size()]));
+                    } else if (c.known_term.leq(c.lb)) {
+                        // the constraint cannot be satisfied..
+                        final List<Lit> learnt_clause = new ObjectArrayList<>();
+                        learnt_clause.add(new Lit(c.b, false));
+                        for (Int2ObjectMap.Entry<Rational> term : c.expr.vars.int2ObjectEntrySet()) {
+                            switch (sat.value(term.getIntKey())) {
+                            case False:
+                                learnt_clause.add(new Lit(term.getIntKey()));
+                                break;
+                            case True:
+                                learnt_clause.add(new Lit(term.getIntKey(), false));
+                                break;
+                            }
+                        }
+                        sat.record(learnt_clause.toArray(new Lit[learnt_clause.size()]));
+                    }
+                    break;
+                }
+                break;
+            case GEq:
+                switch (sat.value(c.b)) {
+                case False:
+                    break;
+                case True:
+                    break;
+                case Undefined:
+                    if (c.known_term.lt(c.lb)) {
+                        // the constraint cannot be satisfied..
+                        final List<Lit> learnt_clause = new ObjectArrayList<>();
+                        learnt_clause.add(new Lit(c.b, false));
+                        for (Int2ObjectMap.Entry<Rational> term : c.expr.vars.int2ObjectEntrySet()) {
+                            switch (sat.value(term.getIntKey())) {
+                            case False:
+                                learnt_clause.add(new Lit(term.getIntKey()));
+                                break;
+                            case True:
+                                learnt_clause.add(new Lit(term.getIntKey(), false));
+                                break;
+                            }
+                        }
+                        sat.record(learnt_clause.toArray(new Lit[learnt_clause.size()]));
+                    } else if (c.known_term.geq(c.ub)) {
+                        // the constraint is already satisfied..
+                        final List<Lit> learnt_clause = new ObjectArrayList<>();
+                        learnt_clause.add(new Lit(c.b));
+                        for (Int2ObjectMap.Entry<Rational> term : c.expr.vars.int2ObjectEntrySet()) {
+                            switch (sat.value(term.getIntKey())) {
+                            case False:
+                                learnt_clause.add(new Lit(term.getIntKey()));
+                                break;
+                            case True:
+                                learnt_clause.add(new Lit(term.getIntKey(), false));
+                                break;
+                            }
+                        }
+                        sat.record(learnt_clause.toArray(new Lit[learnt_clause.size()]));
+                    }
+                    break;
+                }
+                break;
+            }
+        }
         return true;
     }
 
@@ -197,9 +327,76 @@ public class PBTheory implements Theory {
 
     @Override
     public void push() {
+        layers.add(new Layer());
     }
 
     @Override
     public void pop() {
+        Layer layer = layers.pollFirst();
+        for (java.util.Map.Entry<PBConstraint, Rational> lb : layer.lbs.entrySet()) {
+            lb.getKey().lb.add(lb.getValue().minus(lb.getKey().lb));
+        }
+        for (java.util.Map.Entry<PBConstraint, Rational> ub : layer.ubs.entrySet()) {
+            ub.getKey().ub.add(ub.getValue().minus(ub.getKey().ub));
+        }
+        for (PBConstraint c : layer.cnstrs) {
+            for (Entry<Rational> var : c.expr.vars.int2ObjectEntrySet()) {
+                c_watches.computeIfAbsent(var.getIntKey(), k -> {
+                    return new ObjectArrayList<>();
+                }).add(c);
+            }
+        }
+    }
+
+    private class PBConstraint {
+
+        final int b; // the controlling (propositional) variable..
+        final Lin expr;
+        final Op op;
+        final InfRational known_term;
+        final Rational lb, ub;
+
+        PBConstraint(int b, final Lin expr, Rational lb, Rational ub, final Op op, InfRational known_term) {
+            this.b = b;
+            this.expr = expr;
+            this.op = op;
+            this.known_term = known_term;
+            for (Entry<Rational> var : expr.vars.int2ObjectEntrySet()) {
+                c_watches.computeIfAbsent(var.getIntKey(), k -> {
+                    return new ObjectArrayList<>();
+                }).add(this);
+            }
+            this.lb = lb;
+            this.ub = ub;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("[b").append(b).append("] ");
+            sb.append(expr.toString().replace('x', 'b'));
+            switch (op) {
+            case LEq:
+                sb.append(" <= ");
+                break;
+            case GEq:
+                sb.append(" >= ");
+                break;
+            default:
+                throw new AssertionError(op.name());
+            }
+            sb.append(known_term.toString());
+            return sb.toString();
+        }
+    }
+
+    enum Op {
+        LEq, GEq
+    }
+
+    private static class Layer {
+        private final Object2ObjectMap<PBConstraint, Rational> lbs = new Object2ObjectOpenHashMap<>();
+        private final Object2ObjectMap<PBConstraint, Rational> ubs = new Object2ObjectOpenHashMap<>();
+        private final ObjectOpenHashSet<PBConstraint> cnstrs = new ObjectOpenHashSet<>();
     }
 }

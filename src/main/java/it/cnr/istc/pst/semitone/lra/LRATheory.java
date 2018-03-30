@@ -91,9 +91,9 @@ public class LRATheory implements Theory {
         final InfRational c_right = new InfRational(l_xpr.known_term.minus(), -1);
         l_xpr.known_term = new Rational();
 
-        if (ub(l_xpr).leq(c_right)) {
+        if (ub(l_xpr).lt(c_right)) {
             return TRUE_var; // the constraint is already satisfied..
-        } else if (lb(l_xpr).gt(c_right)) {
+        } else if (lb(l_xpr).geq(c_right)) {
             return FALSE_var; // the constraint is unsatisfable..
         }
 
@@ -176,9 +176,9 @@ public class LRATheory implements Theory {
         final InfRational c_right = new InfRational(l_xpr.known_term.minus(), 1);
         l_xpr.known_term = new Rational();
 
-        if (lb(l_xpr).geq(c_right)) {
+        if (lb(l_xpr).gt(c_right)) {
             return TRUE_var; // the constraint is already satisfied..
-        } else if (ub(l_xpr).lt(c_right)) {
+        } else if (ub(l_xpr).leq(c_right)) {
             return FALSE_var; // the constraint is unsatisfable..
         }
 
