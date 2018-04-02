@@ -392,9 +392,7 @@ public class PBTheory implements Theory {
         // we restore the removed constraints..
         for (PBConstraint c : layer.cnstrs) {
             for (Entry<Rational> var : c.expr.vars.int2ObjectEntrySet()) {
-                c_watches.computeIfAbsent(var.getIntKey(), k -> {
-                    return new ObjectArrayList<>();
-                }).add(c);
+                c_watches.computeIfAbsent(var.getIntKey(), k -> new ObjectArrayList<>()).add(c);
             }
         }
     }
@@ -413,9 +411,7 @@ public class PBTheory implements Theory {
             this.op = op;
             this.known_term = known_term;
             for (Entry<Rational> var : expr.vars.int2ObjectEntrySet()) {
-                c_watches.computeIfAbsent(var.getIntKey(), k -> {
-                    return new ObjectArrayList<>();
-                }).add(this);
+                c_watches.computeIfAbsent(var.getIntKey(), k -> new ObjectArrayList<>()).add(this);
             }
             this.lb = lb;
             this.ub = ub;
