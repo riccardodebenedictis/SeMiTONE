@@ -41,7 +41,7 @@ boolean check = sat.check();
 b1_val = sat.value(b1);
 ```
 
-Finally, it is possible to restore the contet prior of the assignment through the `pop()` procedure.
+Finally, it is possible to restore the context prior of the assignment through the `pop()` procedure.
 
 ```java
 sat.pop();
