@@ -7,7 +7,7 @@ SeMiTONE maintains backtrackable data structures, allows the creation of variabl
 
 ## Usage
 
-At the core of SeMiTONE there is the `Sat` module, allowing the creation of propositional variables and constraints. Propositional variables are identified through integers. The clause creation procedure introduces a new clause, represented by an array of (direct or negated) literals, into the network, returning `false` if some trivial inconsistency is recognized. It is worth noting that in case the clause creation procedure returns `true` there is no guarantee that the network is still consistent since identifying inconsistencies might occur only after a search process.
+At the core of SeMiTONE there is the `Sat` module which allows the creation of propositional variables and constraints. Propositional variables are identified through integers. The clause creation procedure introduces a new clause, represented by an array of (direct or negated) literals, into the network, returning `false` if some trivial inconsistency is recognized. It is worth noting that in case the clause creation procedure returns `true` there is no guarantee that the network is still consistent since identifying inconsistencies might occur only after a search process.
 
 ```java
 Sat sat = new Sat();
