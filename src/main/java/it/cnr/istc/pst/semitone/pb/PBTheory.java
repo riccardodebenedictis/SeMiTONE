@@ -27,6 +27,7 @@ import java.util.List;
 import it.cnr.istc.pst.semitone.lra.InfRational;
 import it.cnr.istc.pst.semitone.lra.Lin;
 import it.cnr.istc.pst.semitone.lra.Rational;
+import it.cnr.istc.pst.semitone.sat.LBool;
 import it.cnr.istc.pst.semitone.sat.Lit;
 import it.cnr.istc.pst.semitone.sat.Sat;
 import it.cnr.istc.pst.semitone.sat.Theory;
@@ -159,16 +160,11 @@ public class PBTheory implements Theory {
         Rational v = new Rational(l.known_term);
         for (Int2ObjectMap.Entry<Rational> term : l.vars.int2ObjectEntrySet()) {
             if (term.getValue().isPositive()) {
-                switch (sat.value(term.getIntKey())) {
-                case True:
+                if (sat.value(term.getIntKey()) == LBool.True) // we increase the lower bound..
                     v.add(term.getValue());
-                }
             } else {
-                switch (sat.value(term.getIntKey())) {
-                case True:
-                case Undefined:
+                if (sat.value(term.getIntKey()) != LBool.False) // we decrease the lower bound (notice that the term's constant is negative)..
                     v.add(term.getValue());
-                }
             }
         }
         return v;
@@ -184,16 +180,11 @@ public class PBTheory implements Theory {
         Rational v = new Rational(l.known_term);
         for (Int2ObjectMap.Entry<Rational> term : l.vars.int2ObjectEntrySet()) {
             if (term.getValue().isPositive()) {
-                switch (sat.value(term.getIntKey())) {
-                case True:
-                case Undefined:
+                if (sat.value(term.getIntKey()) != LBool.False) // we increase the upper bound..
                     v.add(term.getValue());
-                }
             } else {
-                switch (sat.value(term.getIntKey())) {
-                case True:
+                if (sat.value(term.getIntKey()) == LBool.True) // we decrease the upper bound (notice that the term's constant is negative)..
                     v.add(term.getValue());
-                }
             }
         }
         return v;
