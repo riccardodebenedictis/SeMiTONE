@@ -20,7 +20,6 @@ import it.cnr.istc.pst.semitone.lra.InfRational;
 import it.cnr.istc.pst.semitone.lra.Lin;
 import it.cnr.istc.pst.semitone.lra.Rational;
 import it.cnr.istc.pst.semitone.sat.Lit;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
 
@@ -50,11 +49,7 @@ public class PBConstraint {
     }
 
     boolean propagate(final Lit p, final List<Lit> cnfl) {
-        if (p.v == b) {
-            if (p.sign) {
-            } else {
-            }
-        } else {
+        if (p.v != b) {
             // we update the bounds..
             Rational c = expr.vars.get(p.v);
             if (c.isPositive()) {
@@ -86,93 +81,69 @@ public class PBConstraint {
                     lb.sub(c);
                 }
             }
-            switch (op) {
-                case LEq:
+        }
+
+        switch (op) {
+            case LEq:
+                if (known_term.geq(ub)) {  // the constraint has become satisfied as a consequence of the bound update..
                     switch (th.sat.value(b)) {
-                        case False:
-                            if (known_term.geq(ub)) {
-                                // the constraint has become satisfied as a consequence of the bound update..
-                            }
-                            break;
-                        case True:
+                        case False: // inconsistency: the constraint must be not satisfied..
+                            // we generate an explanation for the inconsistency..
                             break;
                         case Undefined:
-                            if (known_term.geq(ub)) {
-                                // the constraint has become satisfied as a consequence of the bound update..
-                                final List<Lit> learnt_clause = new ObjectArrayList<>();
-                                learnt_clause.add(new Lit(b));
-                                for (Int2ObjectMap.Entry<Rational> term : expr.vars.int2ObjectEntrySet()) {
-                                    switch (th.sat.value(term.getIntKey())) {
-                                        case False:
-                                            learnt_clause.add(new Lit(term.getIntKey()));
-                                            break;
-                                        case True:
-                                            learnt_clause.add(new Lit(term.getIntKey(), false));
-                                            break;
-                                    }
-                                }
-                                th.sat.record(learnt_clause.toArray(new Lit[learnt_clause.size()]));
-                            } else if (known_term.lt(lb)) {
-                                // the constraint has become unsatisfable as a consequence of the bound update..
-                                final List<Lit> learnt_clause = new ObjectArrayList<>();
-                                learnt_clause.add(new Lit(b, false));
-                                for (Int2ObjectMap.Entry<Rational> term : expr.vars.int2ObjectEntrySet()) {
-                                    switch (th.sat.value(term.getIntKey())) {
-                                        case False:
-                                            learnt_clause.add(new Lit(term.getIntKey()));
-                                            break;
-                                        case True:
-                                            learnt_clause.add(new Lit(term.getIntKey(), false));
-                                            break;
-                                    }
-                                }
-                                th.sat.record(learnt_clause.toArray(new Lit[learnt_clause.size()]));
-                            }
                             break;
                     }
-                    break;
-                case GEq:
+                } else if (known_term.lt(lb)) {  // the constraint has become unsatisfable as a consequence of the bound update..
+                    switch (th.sat.value(b)) {
+                        case True: // inconsistency: the constraint must be satisfied..
+                            // we generate an explanation for the inconsistency..
+                            break;
+                        case Undefined:
+                            break;
+                        default:
+                            throw new AssertionError(th.sat.value(b).name());
+                    }
+                } else { // we try to propagate something..
                     switch (th.sat.value(b)) {
                         case False:
                             break;
                         case True:
                             break;
+                    }
+                }
+                break;
+            case GEq:
+                if (known_term.leq(lb)) {  // the constraint has become satisfied as a consequence of the bound update..
+                    switch (th.sat.value(b)) {
+                        case False: // inconsistency: the constraint must be not satisfied..
+                            // we generate an explanation for the inconsistency..
+                            break;
                         case Undefined:
-                            if (known_term.leq(lb)) {
-                                // the constraint has become satisfied as a consequence of the bound update..
-                                final List<Lit> learnt_clause = new ObjectArrayList<>();
-                                learnt_clause.add(new Lit(b, false));
-                                for (Int2ObjectMap.Entry<Rational> term : expr.vars.int2ObjectEntrySet()) {
-                                    switch (th.sat.value(term.getIntKey())) {
-                                        case False:
-                                            learnt_clause.add(new Lit(term.getIntKey()));
-                                            break;
-                                        case True:
-                                            learnt_clause.add(new Lit(term.getIntKey(), false));
-                                            break;
-                                    }
-                                }
-                                th.sat.record(learnt_clause.toArray(new Lit[learnt_clause.size()]));
-                            } else if (known_term.gt(ub)) {
-                                // the constraint has become unsatisfable as a consequence of the bound update..
-                                final List<Lit> learnt_clause = new ObjectArrayList<>();
-                                learnt_clause.add(new Lit(b));
-                                for (Int2ObjectMap.Entry<Rational> term : expr.vars.int2ObjectEntrySet()) {
-                                    switch (th.sat.value(term.getIntKey())) {
-                                        case False:
-                                            learnt_clause.add(new Lit(term.getIntKey()));
-                                            break;
-                                        case True:
-                                            learnt_clause.add(new Lit(term.getIntKey(), false));
-                                            break;
-                                    }
-                                }
-                                th.sat.record(learnt_clause.toArray(new Lit[learnt_clause.size()]));
-                            }
+                            break;
+                        default:
+                            throw new AssertionError(th.sat.value(b).name());
+                    }
+                } else if (known_term.gt(ub)) {  // the constraint has become unsatisfable as a consequence of the bound update..
+                    switch (th.sat.value(b)) {
+                        case True: // inconsistency: the constraint must be satisfied..
+                            // we generate an explanation for the inconsistency..
+                            break;
+                        case Undefined:
+                            break;
+                        default:
+                            throw new AssertionError(th.sat.value(b).name());
+                    }
+                } else { // we try to propagate something..
+                    switch (th.sat.value(b)) {
+                        case False:
+                            break;
+                        case True:
                             break;
                     }
-                    break;
-            }
+                }
+                break;
+            default:
+                throw new AssertionError(op.name());
         }
         return true;
     }
